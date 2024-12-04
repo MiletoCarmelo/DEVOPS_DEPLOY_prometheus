@@ -1,5 +1,6 @@
 {{- if .Values.serviceMonitors.kafka.enabled }}
-apiVersion: monitoring.coreos.com/v1
+# apiVersion: monitoring.coreos.com/v1
+apiVersion: monitoring.coreos.com/v1beta1    # Changement ici
 kind: ServiceMonitor
 metadata:
   name: prometheus-kube-prometheus-kafka
