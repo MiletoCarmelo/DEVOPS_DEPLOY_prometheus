@@ -1,0 +1,92 @@
+kube-prometheus-stack:
+  prometheusOperator:
+    enabled: true
+    createCustomResourceDefinitions: true
+    admissionWebhooks:
+      enabled: false
+    tls:
+      enabled: false
+
+prometheus:
+  enabled: true
+  prometheusSpec:
+    retention: 15d
+    resources:
+      requests:
+        memory: "256Mi"
+        cpu: "100m"
+      limits:
+        memory: "512Mi"
+        cpu: "200m"
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 10Gi
+
+grafana:
+  enabled: true
+  adminPassword: admin
+  persistence:
+    enabled: true
+    size: 10Gi
+  
+  # Configuration des dashboards
+  dashboards:
+    default:
+      kubernetes:
+        gnetId: 315
+        revision: 3
+        datasource: Prometheus
+      kafka:
+        gnetId: 7589
+        revision: 5
+        datasource: Prometheus
+
+  # Configuration des datasources
+  datasources:
+    datasources.yaml:
+      apiVersion: 1
+      datasources:
+      - name: Prometheus
+        type: prometheus
+        url: http://prometheus-operated:9090
+        isDefault: true
+  
+  # Configuration des plugins
+  plugins:
+    - grafana-piechart-panel
+    - grafana-clock-panel
+
+  # Configuration des alertes
+  notifiers:
+    - name: email-notifier
+      type: email
+      uid: email1
+      # Autres configurations d'alerte selon vos besoins
+
+  # Configurations de sécurité supplémentaires
+  securityContext:
+    runAsUser: 472
+    runAsGroup: 472
+    fsGroup: 472
+
+  # Configuration des ressources
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 100m
+    limits:
+      memory: 512Mi
+      cpu: 200m
+
+  # Configuration de l'ingress si nécessaire
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    hosts:
+      - grafana.local
+    annotations:
+      nginx.ingress.kubernetes.io/ssl-redirect: "false"

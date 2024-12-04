@@ -1,9 +1,0 @@
-apiVersion: monitoring.coreos.com/v1
-kind: Prometheus
-metadata:
-  name: prometheus
-  namespace: {{ .Values.prometheus.namespace }}
-spec:
-  replicas: 1
-  resources:
-    {{- toYaml .Values.prometheus.resources | nindent 4 }}
