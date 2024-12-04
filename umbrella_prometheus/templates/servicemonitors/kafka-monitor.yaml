@@ -1,16 +1,12 @@
 {{- if .Values.serviceMonitors.kafka.enabled }}
-# apiVersion: monitoring.coreos.com/v1
-apiVersion: monitoring.coreos.com/v1beta1    # Changement ici
+apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: prometheus-kube-prometheus-kafka
+  name: prometheus-kube-prometheus-kafka  # Le nom est correct
   namespace: {{ .Release.Namespace }}
   labels:
-    app.kubernetes.io/component: monitoring
-    app.kubernetes.io/name: kube-prometheus-stack
-    app.kubernetes.io/part-of: kube-prometheus-stack
-    app.kubernetes.io/version: "v0.68.0"
-    release: {{ .Release.Name }}  # Ajout important
+    app.kubernetes.io/managed-by: prometheus-operator  # Match avec le sélecteur
+    release: {{ .Release.Name }}
 spec:
   selector:
     matchLabels:
@@ -19,10 +15,7 @@ spec:
   - port: metrics
     interval: 30s
     path: /metrics
-    scheme: http    # Ajout important
   namespaceSelector:
     matchNames:
       - kafka-dev
-  targetLabels:     # Ajout important
-    - app
 {{- end }}

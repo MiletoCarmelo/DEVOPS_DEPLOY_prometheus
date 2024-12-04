@@ -8,7 +8,10 @@ kube-prometheus-stack:
     tls:
       enabled: false
     serviceMonitor:
+      enabled: true  # Activation explicite
       selfMonitor: true
+      labels:
+        app.kubernetes.io/managed-by: prometheus-operator  # Match avec le sélecteur
 
   prometheus:
     enabled: true
@@ -16,10 +19,12 @@ kube-prometheus-stack:
       serviceMonitorSelector:
         matchLabels:
           # release: prometheus-stack 
-          app.kubernetes.io/part-of: kube-prometheus-stack
+          # app.kubernetes.io/part-of: kube-prometheus-stack
+          app.kubernetes.io/managed-by: prometheus-operator  # Ajout important
       ruleSelector:                # Ajout important
         matchLabels:
-          app.kubernetes.io/part-of: kube-prometheus-stack
+          # app.kubernetes.io/part-of: kube-prometheus-stack
+          app.kubernetes.io/managed-by: prometheus-operator  # Ajout important
       serviceMonitorNamespaceSelector: {}  # Ajout important
       ruleNamespaceSelector: {}           # Ajout important
       retention: 15d
