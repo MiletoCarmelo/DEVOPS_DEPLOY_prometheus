@@ -7,11 +7,8 @@ metadata:
     grafana_dashboard: "true"
     app: {{ .Release.Name }}
 data:
-  {{- $path := "dashboards" }}
-  {{- $files := .Files.Glob (printf "%s/*.json" $path) }}
-  {{- if $files }}
-  {{- range $fileName, $fileContent := $files }}
-  {{ base $fileName }}: |-
-    {{- $fileContent | nindent 4 }}
-  {{- end }}
+  {{- $path := "templates/dashboards" }}
+  {{- range $path, $fileContents := .Files.Glob "templates/dashboards/*.json" }}
+  {{ base $path }}: |
+{{ $.Files.Get $path | indent 4 }}
   {{- end }}
