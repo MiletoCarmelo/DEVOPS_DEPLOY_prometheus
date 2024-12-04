@@ -15,7 +15,13 @@ kube-prometheus-stack:
     prometheusSpec:
       serviceMonitorSelector:
         matchLabels:
-          release: prometheus-stack 
+          # release: prometheus-stack 
+          app.kubernetes.io/part-of: kube-prometheus-stack
+      ruleSelector:                # Ajout important
+        matchLabels:
+          app.kubernetes.io/part-of: kube-prometheus-stack
+      serviceMonitorNamespaceSelector: {}  # Ajout important
+      ruleNamespaceSelector: {}           # Ajout important
       retention: 15d
       resources:
         requests:

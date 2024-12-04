@@ -1,6 +1,7 @@
 ==== ./umbrella_prometheus/values.yaml ====
 
 kube-prometheus-stack:
+
   prometheusOperator:
     enabled: true
     createCustomResourceDefinitions: true
@@ -8,10 +9,15 @@ kube-prometheus-stack:
       enabled: false
     tls:
       enabled: false
+    serviceMonitor:
+      selfMonitor: true
 
   prometheus:
     enabled: true
     prometheusSpec:
+      serviceMonitorSelector:
+        matchLabels:
+          release: prometheus-stack 
       retention: 15d
       resources:
         requests:
@@ -86,7 +92,7 @@ serviceMonitors:
 apiVersion: v2
 name: prometheus-umbrella
 description: Umbrella chart for Prometheus monitoring stack using kube-prometheus-stack
-version: 0.1.0
+version: 0.1.3
 dependencies:
   - name: kube-prometheus-stack
     version: 66.3.0
@@ -114,10 +120,13 @@ data:
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
-  name: custom-k8s-alerts
+  name: prometheus-kube-prometheus-kafka-alerts
   namespace: {{ .Release.Namespace }}
   labels:
-    release: {{ .Release.Name }}
+    app.kubernetes.io/component: monitoring
+    app.kubernetes.io/name: kube-prometheus-stack
+    app.kubernetes.io/part-of: kube-prometheus-stack
+    app.kubernetes.io/version: "v0.68.0"
 spec:
   groups:
     - name: kubernetes-apps
@@ -201,13 +210,23 @@ spec:
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: kafka-monitor
+  name: prometheus-kube-prometheus-kafka
   namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/component: monitoring
+    app.kubernetes.io/name: kube-prometheus-stack
+    app.kubernetes.io/part-of: kube-prometheus-stack
+    app.kubernetes.io/version: "v0.68.0"
 spec:
   selector:
     matchLabels:
       app: kafka
   endpoints:
   - port: metrics
+    interval: 30s
+    path: /metrics
+  namespaceSelector:
+    matchNames:
+      - kafka-dev
 {{- end }}
 
