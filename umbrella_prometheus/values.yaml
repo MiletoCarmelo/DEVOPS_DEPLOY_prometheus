@@ -32,48 +32,33 @@ kube-prometheus-stack:
     persistence:
       enabled: true
       size: 10Gi
-    
-    # Configuration des dashboards
-    dashboards:
-      default:
-        kubernetes:
-          gnetId: 315
-          revision: 3
-          datasource: Prometheus
-        kafka:
-          gnetId: 7589
-          revision: 5
-          datasource: Prometheus
 
-    # Configuration des datasources
-    datasources:
-      datasources.yaml:
-        apiVersion: 1
-        datasources:
-          - name: Prometheus
-            type: prometheus
-            url: http://prometheus-operated:9090
-            isDefault: true
+    # Ajout de la configuration du sidecar pour les dashboards
+    sidecar:
+      dashboards:
+        enabled: true
+        label: grafana_dashboard
+        searchNamespace: ALL
+        defaultFolderName: "General"
+        provider:
+          folder: "General"
     
-    # Configuration des plugins
+    # Le reste de votre configuration Grafana...
     plugins:
       - grafana-piechart-panel
       - grafana-clock-panel
 
-    # Configuration des alertes corrigée
     notifiers:
-      default:  # Ajout d'une clé 'default'
+      default:
         name: email-notifier
         type: email
         uid: email1
-    
-    # Configurations de sécurité supplémentaires
+
     securityContext:
       runAsUser: 472
       runAsGroup: 472
       fsGroup: 472
 
-    # Configuration des ressources
     resources:
       requests:
         memory: 256Mi
@@ -82,7 +67,6 @@ kube-prometheus-stack:
         memory: 512Mi
         cpu: 200m
 
-    # Configuration de l'ingress
     ingress:
       enabled: true
       ingressClassName: nginx
