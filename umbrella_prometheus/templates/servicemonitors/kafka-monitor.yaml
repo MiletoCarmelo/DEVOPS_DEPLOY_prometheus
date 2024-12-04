@@ -4,10 +4,15 @@ kind: ServiceMonitor
 metadata:
   name: kafka-monitor
   namespace: {{ .Release.Namespace }}
+  labels:
+    release: {{ .Release.Name }}
 spec:
   selector:
     matchLabels:
       app: kafka
   endpoints:
   - port: metrics
+    interval: 30s  # Ajout d'un intervalle de scraping
+  namespaceSelector:
+    any: true  # Pour monitorer à travers les namespaces
 {{- end }}

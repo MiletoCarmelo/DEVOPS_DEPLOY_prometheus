@@ -5,6 +5,8 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     release: {{ .Release.Name }}
+    app: prometheus
+    prometheus: {{ .Release.Name }}-prometheus  # Ajout important
 spec:
   groups:
     - name: kubernetes-apps
