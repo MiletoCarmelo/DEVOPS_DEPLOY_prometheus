@@ -1,0 +1,39 @@
+kube-prometheus-stack:
+  prometheusOperator:
+    enabled: true
+    createCustomResourceDefinitions: true
+    admissionWebhooks:
+      enabled: false
+    tls:
+      enabled: false
+
+  prometheus:
+    enabled: true
+    prometheusSpec:
+      retention: 15d
+      resources:
+        requests:
+          memory: "256Mi"
+          cpu: "100m"
+        limits:
+          memory: "512Mi"
+          cpu: "200m"
+      storageSpec:
+        volumeClaimTemplate:
+          spec:
+            accessModes: ["ReadWriteOnce"]
+            resources:
+              requests:
+                storage: 10Gi
+
+  alertmanager:
+    enabled: false
+
+  grafana:
+    enabled: false
+
+  nodeExporter:
+    enabled: true
+
+  kubeStateMetrics:
+    enabled: true
