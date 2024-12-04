@@ -9,13 +9,13 @@ kube-prometheus-stack:
       enabled: false
     serviceMonitor:
       selfMonitor: true
-      
+
   prometheus:
     enabled: true
     prometheusSpec:
       serviceMonitorSelector:
         matchLabels:
-          release: {{ .Release.Name }}
+          release: prometheus-stack 
       retention: 15d
       resources:
         requests:
