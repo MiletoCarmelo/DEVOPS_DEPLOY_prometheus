@@ -1,4 +1,5 @@
 kube-prometheus-stack:
+
   prometheusOperator:
     enabled: true
     createCustomResourceDefinitions: true
@@ -6,10 +7,15 @@ kube-prometheus-stack:
       enabled: false
     tls:
       enabled: false
-
+    serviceMonitor:
+      selfMonitor: true
+      
   prometheus:
     enabled: true
     prometheusSpec:
+      serviceMonitorSelector:
+        matchLabels:
+          release: {{ .Release.Name }}
       retention: 15d
       resources:
         requests:

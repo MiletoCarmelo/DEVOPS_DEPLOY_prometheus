@@ -12,7 +12,9 @@ spec:
       app: kafka
   endpoints:
   - port: metrics
-    interval: 30s  # Ajout d'un intervalle de scraping
+    interval: 30s
+    path: /metrics
   namespaceSelector:
-    any: true  # Pour monitorer à travers les namespaces
+    matchNames:
+      - {{ .Release.Namespace }}
 {{- end }}
