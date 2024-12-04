@@ -60,9 +60,10 @@ kube-prometheus-stack:
       - grafana-piechart-panel
       - grafana-clock-panel
 
-    # Configuration des alertes
+    # Configuration des alertes corrigée
     notifiers:
-      - name: email-notifier
+      default:  # Ajout d'une clé 'default'
+        name: email-notifier
         type: email
         uid: email1
     
@@ -90,7 +91,6 @@ kube-prometheus-stack:
       annotations:
         nginx.ingress.kubernetes.io/ssl-redirect: "false"
 
-# Ajout de la configuration pour le ServiceMonitor
 serviceMonitors:
   kafka:
     enabled: true
