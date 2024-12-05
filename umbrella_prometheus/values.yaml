@@ -1,5 +1,5 @@
 kube-prometheus-stack:
-
+  namespace: monitoring
   prometheusOperator:
     enabled: true
     createCustomResourceDefinitions: true
@@ -8,25 +8,22 @@ kube-prometheus-stack:
     tls:
       enabled: false
     serviceMonitor:
-      enabled: true  # Activation explicite
+      enabled: true
       selfMonitor: true
       labels:
-        app.kubernetes.io/managed-by: prometheus-operator  # Match avec le sélecteur
+        app.kubernetes.io/managed-by: prometheus-operator
 
   prometheus:
     enabled: true
     prometheusSpec:
       serviceMonitorSelector:
         matchLabels:
-          # release: prometheus-stack 
-          # app.kubernetes.io/part-of: kube-prometheus-stack
-          app.kubernetes.io/managed-by: prometheus-operator  # Ajout important
-      ruleSelector:                # Ajout important
+          app.kubernetes.io/managed-by: prometheus-operator
+      ruleSelector:
         matchLabels:
-          # app.kubernetes.io/part-of: kube-prometheus-stack
-          app.kubernetes.io/managed-by: prometheus-operator  # Ajout important
-      serviceMonitorNamespaceSelector: {}  # Ajout important
-      ruleNamespaceSelector: {}           # Ajout important
+          app.kubernetes.io/managed-by: prometheus-operator
+      serviceMonitorNamespaceSelector: {}
+      ruleNamespaceSelector: {}
       retention: 15d
       resources:
         requests:
@@ -49,8 +46,6 @@ kube-prometheus-stack:
     persistence:
       enabled: true
       size: 10Gi
-
-    # Ajout de la configuration du sidecar pour les dashboards
     sidecar:
       dashboards:
         enabled: true
@@ -59,23 +54,18 @@ kube-prometheus-stack:
         defaultFolderName: "General"
         provider:
           folder: "General"
-    
-    # Le reste de votre configuration Grafana...
     plugins:
       - grafana-piechart-panel
       - grafana-clock-panel
-
     notifiers:
       default:
         name: email-notifier
         type: email
         uid: email1
-
     securityContext:
       runAsUser: 472
       runAsGroup: 472
       fsGroup: 472
-
     resources:
       requests:
         memory: 256Mi
@@ -83,7 +73,6 @@ kube-prometheus-stack:
       limits:
         memory: 512Mi
         cpu: 200m
-
     ingress:
       enabled: true
       ingressClassName: nginx
@@ -92,13 +81,10 @@ kube-prometheus-stack:
       annotations:
         nginx.ingress.kubernetes.io/ssl-redirect: "false"
 
-
-# attention no indentation!
 serviceMonitors:
   kafka:
     enabled: true
-    groupVersion: monitoring.coreos.com/v1  # Ajout ici
+    groupVersion: monitoring.coreos.com/v1
 
-# attention no indentation!
 prometheusRules:
-  groupVersion: monitoring.coreos.com/v1    # Ajout ici
+  groupVersion: monitoring.coreos.com/v1
