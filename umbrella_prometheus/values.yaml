@@ -12,6 +12,9 @@ kube-prometheus-stack:
       selfMonitor: true
       labels:
         app.kubernetes.io/managed-by: prometheus-operator
+    serviceAccount:
+      annotations:
+        "kubectl.kubernetes.io/last-applied-configuration": ""
 
   prometheus:
     enabled: true
@@ -40,6 +43,9 @@ kube-prometheus-stack:
             resources:
               requests:
                 storage: 10Gi
+    serviceAccount:
+      annotations:
+        "kubectl.kubernetes.io/last-applied-configuration": ""
 
   grafana:
     enabled: true
@@ -82,6 +88,9 @@ kube-prometheus-stack:
         - grafana.local
       annotations:
         nginx.ingress.kubernetes.io/ssl-redirect: "false"
+  serviceAccount:
+      annotations:
+        "kubectl.kubernetes.io/last-applied-configuration": ""
 
 serviceMonitors:
   kafka:
