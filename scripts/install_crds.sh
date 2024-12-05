@@ -59,3 +59,32 @@ kubectl create namespace monitoring
 # rm -rf "$TEMP_DIR"
 
 # echo "CRDs installation completed!"
+
+TEMP_DIR="./manifests"
+echo "Creating directory: $TEMP_DIR"
+
+# Check if directory exists, if not create it
+if [ ! -d "$TEMP_DIR" ]; then
+    echo "Directory $TEMP_DIR does not exist. Creating it..."
+    mkdir -p "$TEMP_DIR"
+    echo "Directory created successfully."
+else
+    echo "Directory $TEMP_DIR already exists."
+fi
+
+# Clone the repository and copy the required folder
+echo "Cloning the repository..."
+mkdir temp_repo
+git clone --depth 1 https://github.com/prometheus-operator/kube-prometheus.git temp_repo
+
+
+
+# Copier uniquement le dossier `manifests` dans le répertoire cible
+echo "Copying manifests..."
+cp -r ./temp_repo/manifests/* "$TEMP_DIR/"
+
+# Supprimer le dépôt temporaire
+rm -rf temp_repo
+
+echo "Manifests copied to $TEMP_DIR"
+
