@@ -9,6 +9,7 @@ metadata:
     app.kubernetes.io/part-of: kube-prometheus-stack
     app.kubernetes.io/version: "v0.68.0"
 spec:
+  groupVersion: {{ .Values.prometheusRules.groupVersion }}  # Référence à values.yaml
   groups:
     - name: kubernetes-apps
       rules:

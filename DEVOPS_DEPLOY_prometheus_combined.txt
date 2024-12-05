@@ -10,14 +10,25 @@ kube-prometheus-stack:
     tls:
       enabled: false
     serviceMonitor:
+      enabled: true  # Activation explicite
       selfMonitor: true
+      labels:
+        app.kubernetes.io/managed-by: prometheus-operator  # Match avec le sélecteur
 
   prometheus:
     enabled: true
     prometheusSpec:
       serviceMonitorSelector:
         matchLabels:
-          release: prometheus-stack 
+          # release: prometheus-stack 
+          # app.kubernetes.io/part-of: kube-prometheus-stack
+          app.kubernetes.io/managed-by: prometheus-operator  # Ajout important
+      ruleSelector:                # Ajout important
+        matchLabels:
+          # app.kubernetes.io/part-of: kube-prometheus-stack
+          app.kubernetes.io/managed-by: prometheus-operator  # Ajout important
+      serviceMonitorNamespaceSelector: {}  # Ajout important
+      ruleNamespaceSelector: {}           # Ajout important
       retention: 15d
       resources:
         requests:
@@ -210,13 +221,11 @@ spec:
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: prometheus-kube-prometheus-kafka
+  name: prometheus-kube-prometheus-kafka  # Le nom est correct
   namespace: {{ .Release.Namespace }}
   labels:
-    app.kubernetes.io/component: monitoring
-    app.kubernetes.io/name: kube-prometheus-stack
-    app.kubernetes.io/part-of: kube-prometheus-stack
-    app.kubernetes.io/version: "v0.68.0"
+    app.kubernetes.io/managed-by: prometheus-operator  # Match avec le sélecteur
+    release: {{ .Release.Name }}
 spec:
   selector:
     matchLabels:

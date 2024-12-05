@@ -8,6 +8,7 @@ metadata:
     app.kubernetes.io/managed-by: prometheus-operator  # Match avec le sélecteur
     release: {{ .Release.Name }}
 spec:
+  groupVersion: {{ .Values.serviceMonitors.kafka.groupVersion }}  # Référence à values.yaml
   selector:
     matchLabels:
       app: kafka

@@ -92,6 +92,13 @@ kube-prometheus-stack:
       annotations:
         nginx.ingress.kubernetes.io/ssl-redirect: "false"
 
+
+# attention no indentation!
 serviceMonitors:
   kafka:
     enabled: true
+    groupVersion: monitoring.coreos.com/v1  # Ajout ici
+
+# attention no indentation!
+prometheusRules:
+  groupVersion: monitoring.coreos.com/v1    # Ajout ici
