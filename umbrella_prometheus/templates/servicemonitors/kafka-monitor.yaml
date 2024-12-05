@@ -2,21 +2,21 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: prometheus-kube-prometheus-kafka  # Le nom est correct
+  name: prometheus-kube-prometheus-kafka
   namespace: {{ .Release.Namespace }}
   labels:
-    app.kubernetes.io/managed-by: prometheus-operator  # Match avec le sélecteur
+    app.kubernetes.io/managed-by: prometheus-operator
     release: {{ .Release.Name }}
 spec:
-  groupVersion: {{ .Values.serviceMonitors.kafka.groupVersion }}  # Référence à values.yaml
+  groupVersion: {{ .Values.serviceMonitors.kafka.groupVersion }}
   selector:
     matchLabels:
       app: kafka
   endpoints:
-  - port: metrics
-    interval: 30s
-    path: /metrics
+    - port: metrics
+      interval: {{ .Values.serviceMonitors.kafka.scrapeInterval | default "30s" }}
+      path: /metrics
   namespaceSelector:
     matchNames:
-      - kafka-dev
+      - {{ .Values.serviceMonitors.kafka.namespace | default "default" }}
 {{- end }}

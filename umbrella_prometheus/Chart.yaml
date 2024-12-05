@@ -2,6 +2,9 @@ apiVersion: v2
 name: prometheus-umbrella
 description: Umbrella chart for Prometheus monitoring stack using kube-prometheus-stack
 version: 0.1.4
+maintainers:
+  - name: Carmelo Mileto
+    email: carmelo.mileto@gmail.com
 dependencies:
   - name: kube-prometheus-stack
     version: 66.3.0

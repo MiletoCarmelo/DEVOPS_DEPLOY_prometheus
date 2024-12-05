@@ -41,24 +41,24 @@ curl -L -o "$TEMP_DIR/scrapeconfigs.yaml" https://raw.githubusercontent.com/prom
 echo "Creating monitoring namespace..."
 kubectl create namespace monitoring
 
-# # Apply CRDs using server-side apply
-# echo "Applying CRDs..."
-# for file in "$TEMP_DIR"/*.yaml; do
-#     echo "Applying $file"
-#     kubectl apply --server-side -f "$file"
-# done
+# Apply CRDs using server-side apply
+echo "Applying CRDs..."
+for file in "$TEMP_DIR"/*.yaml; do
+    echo "Applying $file"
+    kubectl apply --server-side -f "$file"
+done
 
-# # Wait for CRDs to be established
-# echo "Waiting for CRDs to be established..."
-# kubectl wait \
-#     --for condition=Established \
-#     --all CustomResourceDefinition \
-#     --namespace=monitoring
+# Wait for CRDs to be established
+echo "Waiting for CRDs to be established..."
+kubectl wait \
+    --for condition=Established \
+    --all CustomResourceDefinition \
+    --namespace=monitoring
 
 # echo "Clean up temporary directory..."
 # rm -rf "$TEMP_DIR"
 
-# echo "CRDs installation completed!"
+echo "CRDs installation completed!"
 
 TEMP_DIR="./manifests"
 echo "Creating directory: $TEMP_DIR"

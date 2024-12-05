@@ -4,9 +4,12 @@ kube-prometheus-stack:
   namespace: monitoring
   prometheusOperator:
     enabled: true
-    createCustomResourceDefinitions: true
+    createCustomResourceDefinitions: false  # Important: mettre à false car les CRDs doivent être installés séparément
     admissionWebhooks:
       enabled: false
+      failurePolicy: Ignore  # Ajouter cette ligne
+      patch:
+        enabled: false  # Désactiver le patch de webhook
     tls:
       enabled: false
     serviceMonitor:
@@ -14,6 +17,9 @@ kube-prometheus-stack:
       selfMonitor: true
       labels:
         app.kubernetes.io/managed-by: prometheus-operator
+    serviceAccount:
+      annotations:
+        "kubectl.kubernetes.io/last-applied-configuration": ""
 
   prometheus:
     enabled: true
@@ -42,6 +48,9 @@ kube-prometheus-stack:
             resources:
               requests:
                 storage: 10Gi
+    serviceAccount:
+      annotations:
+        "kubectl.kubernetes.io/last-applied-configuration": ""
 
   grafana:
     enabled: true
@@ -84,6 +93,9 @@ kube-prometheus-stack:
         - grafana.local
       annotations:
         nginx.ingress.kubernetes.io/ssl-redirect: "false"
+  serviceAccount:
+      annotations:
+        "kubectl.kubernetes.io/last-applied-configuration": ""
 
 serviceMonitors:
   kafka:

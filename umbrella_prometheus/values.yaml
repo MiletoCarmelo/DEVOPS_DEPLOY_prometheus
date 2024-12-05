@@ -2,12 +2,12 @@ kube-prometheus-stack:
   namespace: monitoring
   prometheusOperator:
     enabled: true
-    createCustomResourceDefinitions: false  # Important: mettre à false car les CRDs doivent être installés séparément
+    createCustomResourceDefinitions: false
     admissionWebhooks:
       enabled: false
-      failurePolicy: Ignore  # Ajouter cette ligne
+      failurePolicy: Fail  # Changement pour plus de sécurité
       patch:
-        enabled: false  # Désactiver le patch de webhook
+        enabled: false
     tls:
       enabled: false
     serviceMonitor:
@@ -41,7 +41,7 @@ kube-prometheus-stack:
       storageSpec:
         volumeClaimTemplate:
           spec:
-            storageClassName: "local-path"  # même chose ici
+            storageClassName: "local-path"
             accessModes: ["ReadWriteOnce"]
             resources:
               requests:
@@ -52,11 +52,11 @@ kube-prometheus-stack:
 
   grafana:
     enabled: true
-    adminPassword: admin
+    adminPassword: admin  # Remplacer par un secret si nécessaire
     persistence:
       enabled: true
       size: 10Gi
-    storageClassName: "local-path"  # ou une autre storageClass disponible dans votre cluster
+    storageClassName: "local-path"
     sidecar:
       dashboards:
         enabled: true
@@ -68,11 +68,6 @@ kube-prometheus-stack:
     plugins:
       - grafana-piechart-panel
       - grafana-clock-panel
-    notifiers:
-      default:
-        name: email-notifier
-        type: email
-        uid: email1
     securityContext:
       runAsUser: 472
       runAsGroup: 472
@@ -88,17 +83,19 @@ kube-prometheus-stack:
       enabled: true
       ingressClassName: nginx
       hosts:
-        - grafana.local
+        - grafana.local  # Assure-toi que ce domaine résout correctement
       annotations:
         nginx.ingress.kubernetes.io/ssl-redirect: "false"
-  serviceAccount:
-      annotations:
-        "kubectl.kubernetes.io/last-applied-configuration": ""
 
 serviceMonitors:
   kafka:
     enabled: true
+    namespace: kafka-dev
+    scrapeInterval: 60s
     groupVersion: monitoring.coreos.com/v1
 
 prometheusRules:
   groupVersion: monitoring.coreos.com/v1
+
+kafka:
+  lagThreshold: 5000
