@@ -35,6 +35,7 @@ kube-prometheus-stack:
       storageSpec:
         volumeClaimTemplate:
           spec:
+            storageClassName: "local-path"  # même chose ici
             accessModes: ["ReadWriteOnce"]
             resources:
               requests:
@@ -46,6 +47,7 @@ kube-prometheus-stack:
     persistence:
       enabled: true
       size: 10Gi
+    storageClassName: "local-path"  # ou une autre storageClass disponible dans votre cluster
     sidecar:
       dashboards:
         enabled: true
