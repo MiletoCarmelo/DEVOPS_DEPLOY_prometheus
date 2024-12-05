@@ -4,12 +4,12 @@ kube-prometheus-stack:
   namespace: monitoring
   prometheusOperator:
     enabled: true
-    createCustomResourceDefinitions: false  # Important: mettre à false car les CRDs doivent être installés séparément
+    createCustomResourceDefinitions: false
     admissionWebhooks:
       enabled: false
-      failurePolicy: Ignore  # Ajouter cette ligne
+      failurePolicy: Fail  # Changement pour plus de sécurité
       patch:
-        enabled: false  # Désactiver le patch de webhook
+        enabled: false
     tls:
       enabled: false
     serviceMonitor:
@@ -43,7 +43,7 @@ kube-prometheus-stack:
       storageSpec:
         volumeClaimTemplate:
           spec:
-            storageClassName: "local-path"  # même chose ici
+            storageClassName: "local-path"
             accessModes: ["ReadWriteOnce"]
             resources:
               requests:
@@ -54,11 +54,11 @@ kube-prometheus-stack:
 
   grafana:
     enabled: true
-    adminPassword: admin
+    adminPassword: admin  # Remplacer par un secret si nécessaire
     persistence:
       enabled: true
       size: 10Gi
-    storageClassName: "local-path"  # ou une autre storageClass disponible dans votre cluster
+    storageClassName: "local-path"
     sidecar:
       dashboards:
         enabled: true
@@ -70,11 +70,6 @@ kube-prometheus-stack:
     plugins:
       - grafana-piechart-panel
       - grafana-clock-panel
-    notifiers:
-      default:
-        name: email-notifier
-        type: email
-        uid: email1
     securityContext:
       runAsUser: 472
       runAsGroup: 472
@@ -90,20 +85,23 @@ kube-prometheus-stack:
       enabled: true
       ingressClassName: nginx
       hosts:
-        - grafana.local
+        - grafana.local  # Assure-toi que ce domaine résout correctement
       annotations:
         nginx.ingress.kubernetes.io/ssl-redirect: "false"
-  serviceAccount:
-      annotations:
-        "kubectl.kubernetes.io/last-applied-configuration": ""
 
 serviceMonitors:
   kafka:
     enabled: true
+    namespace: kafka-dev
+    scrapeInterval: 60s
     groupVersion: monitoring.coreos.com/v1
 
 prometheusRules:
   groupVersion: monitoring.coreos.com/v1
+
+kafka:
+  lagThreshold: 5000
+
 
 ==== ./umbrella_prometheus/Chart.yaml ====
 
@@ -111,10 +109,14 @@ apiVersion: v2
 name: prometheus-umbrella
 description: Umbrella chart for Prometheus monitoring stack using kube-prometheus-stack
 version: 0.1.4
+maintainers:
+  - name: Carmelo Mileto
+    email: carmelo.mileto@gmail.com
 dependencies:
   - name: kube-prometheus-stack
     version: 66.3.0
     repository: https://prometheus-community.github.io/helm-charts
+
 
 ==== ./umbrella_prometheus/templates/dashboards-configmap.yaml ====
 
@@ -132,6 +134,7 @@ data:
 {{ $.Files.Get $path | indent 4 }}
   {{- end }}
 
+
 ==== ./umbrella_prometheus/templates/prometheusrules/custom-alerts.yaml ====
 
 apiVersion: monitoring.coreos.com/v1
@@ -145,7 +148,7 @@ metadata:
     app.kubernetes.io/part-of: kube-prometheus-stack
     app.kubernetes.io/version: "v0.68.0"
 spec:
-  groupVersion: {{ .Values.prometheusRules.groupVersion }}  # Référence à values.yaml
+  groupVersion: {{ .Values.prometheusRules.groupVersion }}
   groups:
     - name: kubernetes-apps
       rules:
@@ -156,7 +159,7 @@ spec:
             severity: warning
           annotations:
             summary: Pod crashing multiple times
-            description: 'Pod {{ `{{$labels.namespace}}` }}/{{ `{{$labels.pod}}` }} is restarting frequently'
+            description: 'Pod {{ $labels.namespace }}/{{ $labels.pod }} is restarting frequently'
 
         - alert: PodStuckInPending
           expr: kube_pod_status_phase{phase="Pending"} == 1
@@ -165,7 +168,7 @@ spec:
             severity: warning
           annotations:
             summary: Pod stuck in Pending state
-            description: 'Pod {{ `{{$labels.namespace}}` }}/{{ `{{$labels.pod}}` }} has been in pending state for more than 30 minutes'
+            description: 'Pod {{ $labels.namespace }}/{{ $labels.pod }} has been in pending state for more than 30 minutes'
 
     - name: memory-alerts
       rules:
@@ -176,51 +179,19 @@ spec:
             severity: warning
           annotations:
             summary: High memory usage detected
-            description: 'Container {{ `{{$labels.container}}` }} in pod {{ `{{$labels.pod}}` }} is using more than 85% of its memory limit'
-
-    - name: node-alerts
-      rules:
-        - alert: NodeDiskAlmostFull
-          expr: disk_used_percent > 85
-          for: 5m
-          labels:
-            severity: warning
-          annotations:
-            summary: Node disk almost full
-            description: 'Node {{ `{{$labels.instance}}` }} disk usage is {{ `{{$value}}` }}%'
+            description: 'Container {{ $labels.container }} in pod {{ $labels.pod }} is using more than 85% of its memory limit'
 
     - name: kafka-alerts
       rules:
         - alert: KafkaTopicLag
-          expr: kafka_consumergroup_lag > 10000
+          expr: kafka_consumergroup_lag > {{ .Values.kafka.lagThreshold | default 5000 }}
           for: 10m
           labels:
             severity: warning
           annotations:
             summary: Kafka consumer group lag
-            description: 'Consumer group {{ `{{$labels.consumergroup}}` }} on topic {{ `{{$labels.topic}}` }} is lagging by {{ `{{$value}}` }} messages'
+            description: 'Consumer group {{ $labels.consumergroup }} on topic {{ $labels.topic }} is lagging by {{ $value }} messages'
 
-    - name: service-alerts
-      rules:
-        - alert: HighErrorRate
-          expr: rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) * 100 > 5
-          for: 5m
-          labels:
-            severity: critical
-          annotations:
-            summary: High HTTP error rate
-            description: 'Service {{ `{{$labels.service}}` }} has a {{ `{{$value}}` }}% error rate'
-
-    - name: database-alerts
-      rules:
-        - alert: PostgresqlHighConnections
-          expr: pg_stat_activity_count > 100
-          for: 5m
-          labels:
-            severity: warning
-          annotations:
-            summary: High number of PostgreSQL connections
-            description: 'Database {{ `{{$labels.database}}` }} has {{ `{{$value}}` }} active connections'
 
 ==== ./umbrella_prometheus/templates/servicemonitors/kafka-monitor.yaml ====
 
@@ -228,22 +199,23 @@ spec:
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: prometheus-kube-prometheus-kafka  # Le nom est correct
+  name: prometheus-kube-prometheus-kafka
   namespace: {{ .Release.Namespace }}
   labels:
-    app.kubernetes.io/managed-by: prometheus-operator  # Match avec le sélecteur
+    app.kubernetes.io/managed-by: prometheus-operator
     release: {{ .Release.Name }}
 spec:
-  groupVersion: {{ .Values.serviceMonitors.kafka.groupVersion }}  # Référence à values.yaml
+  groupVersion: {{ .Values.serviceMonitors.kafka.groupVersion }}
   selector:
     matchLabels:
       app: kafka
   endpoints:
-  - port: metrics
-    interval: 30s
-    path: /metrics
+    - port: metrics
+      interval: {{ .Values.serviceMonitors.kafka.scrapeInterval | default "30s" }}
+      path: /metrics
   namespaceSelector:
     matchNames:
-      - kafka-dev
+      - {{ .Values.serviceMonitors.kafka.namespace | default "default" }}
 {{- end }}
+
 
