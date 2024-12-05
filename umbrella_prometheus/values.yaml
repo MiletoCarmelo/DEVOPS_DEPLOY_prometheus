@@ -2,9 +2,12 @@ kube-prometheus-stack:
   namespace: monitoring
   prometheusOperator:
     enabled: true
-    createCustomResourceDefinitions: true
+    createCustomResourceDefinitions: false  # Important: mettre à false car les CRDs doivent être installés séparément
     admissionWebhooks:
       enabled: false
+      failurePolicy: Ignore  # Ajouter cette ligne
+      patch:
+        enabled: false  # Désactiver le patch de webhook
     tls:
       enabled: false
     serviceMonitor:
