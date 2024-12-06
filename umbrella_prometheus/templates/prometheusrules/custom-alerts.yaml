@@ -20,8 +20,7 @@ spec:
             severity: warning
           annotations:
             summary: Pod crashing multiple times
-            description: 'Pod {{ $labels.namespace }}/{{ $labels.pod }} is restarting frequently'
-
+            description: 'Pod {{ `{{ $labels.namespace }}` }}/{{ `{{ $labels.pod }}` }} is restarting frequently'
         - alert: PodStuckInPending
           expr: kube_pod_status_phase{phase="Pending"} == 1
           for: 30m
@@ -29,7 +28,7 @@ spec:
             severity: warning
           annotations:
             summary: Pod stuck in Pending state
-            description: 'Pod {{ $labels.namespace }}/{{ $labels.pod }} has been in pending state for more than 30 minutes'
+            description: 'Pod {{ `{{ $labels.namespace }}` }}/{{ `{{ $labels.pod }}` }} has been in pending state for more than 30 minutes'
 
     - name: memory-alerts
       rules:
@@ -40,7 +39,7 @@ spec:
             severity: warning
           annotations:
             summary: High memory usage detected
-            description: 'Container {{ $labels.container }} in pod {{ $labels.pod }} is using more than 85% of its memory limit'
+            description: 'Container {{ `{{ $labels.container }}` }} in pod {{ `{{ $labels.pod }}` }} is using more than 85% of its memory limit'
 
     - name: kafka-alerts
       rules:
@@ -51,4 +50,4 @@ spec:
             severity: warning
           annotations:
             summary: Kafka consumer group lag
-            description: 'Consumer group {{ $labels.consumergroup }} on topic {{ $labels.topic }} is lagging by {{ $value }} messages'
+            description: 'Consumer group {{ `{{ $labels.consumergroup }}` }} on topic {{ `{{ $labels.topic }}` }} is lagging by {{ `{{ $value }}` }} messages'
