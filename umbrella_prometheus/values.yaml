@@ -87,6 +87,7 @@ kube-prometheus-stack:
         - grafana.local
       annotations:
         nginx.ingress.kubernetes.io/ssl-redirect: "false"
+        nginx.ingress.kubernetes.io/enable-admission-webhook: "false"  # Désactive la validation du webhook
 
 serviceMonitors:
   kafka:
