@@ -81,7 +81,7 @@ kube-prometheus-stack:
       httpGet:
         path: /readyz
         port: 8080
-        
+
   grafana:
     enabled: true
     adminPassword: admin  # Remplacer par un secret si nécessaire
@@ -131,11 +131,9 @@ serviceMonitors:
     enabled: true
     namespace: kafka-dev
     scrapeInterval: 60s
-    groupVersion: monitoring.coreos.com/v1
     apiVersion: monitoring.coreos.com/v1
 
 prometheusRules:
-  groupVersion: monitoring.coreos.com/v1
   apiVersion: monitoring.coreos.com/v1
 
 kafka:
