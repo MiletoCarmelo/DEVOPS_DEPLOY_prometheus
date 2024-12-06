@@ -1,6 +1,7 @@
 ==== ./umbrella_prometheus/values.yaml ====
 
 kube-prometheus-stack:
+
   namespace: monitoring
   prometheusOperator:
     enabled: true
@@ -11,7 +12,7 @@ kube-prometheus-stack:
       certManager:
         enabled: true  # Use cert-manager for certificates
       patch:
-        enabled: false
+        enabled: true  # Activer le patch pour installer les certificats
     tls:
       enabled: true # Enable TLS
     serviceMonitor:
@@ -61,47 +62,47 @@ kube-prometheus-stack:
       targetPort: 9100
 
   kubeStateMetrics:
-  enabled: true
-  rbac:
-    create: true
-    clusterRole:
-      rules:
-        - apiGroups: [""]
-          resources: ["nodes", "pods", "services", "resourcequotas", "replicationcontrollers", "limitranges", "persistentvolumeclaims", "persistentvolumes", "namespaces", "endpoints"]
-          verbs: ["list", "watch"]
-        - apiGroups: ["apps"]
-          resources: ["statefulsets", "daemonsets", "deployments", "replicasets"]
-          verbs: ["list", "watch"]
-        - apiGroups: ["batch"]
-          resources: ["cronjobs", "jobs"]
-          verbs: ["list", "watch"]
-        - apiGroups: ["autoscaling"]
-          resources: ["horizontalpodautoscalers"]
-          verbs: ["list", "watch"]
-        - apiGroups: ["networking.k8s.io"]
-          resources: ["ingresses", "networkpolicies"]
-          verbs: ["list", "watch"]
-  serviceAccount:
-    create: true
-  podSecurityPolicy:
-    enabled: false
-  serviceMonitor:
     enabled: true
-  selfMonitor:
-    enabled: true
-  ports:
-    metrics:
-      port: 8080
-    telemetry:
-      port: 8081
-  livenessProbe:
-    httpGet:
-      path: /livez
-      port: 8080
-  readinessProbe:
-    httpGet:
-      path: /readyz
-      port: 8080
+    rbac:
+      create: true
+      clusterRole:
+        rules:
+          - apiGroups: [""]
+            resources: ["nodes", "pods", "services", "resourcequotas", "replicationcontrollers", "limitranges", "persistentvolumeclaims", "persistentvolumes", "namespaces", "endpoints"]
+            verbs: ["list", "watch"]
+          - apiGroups: ["apps"]
+            resources: ["statefulsets", "daemonsets", "deployments", "replicasets"]
+            verbs: ["list", "watch"]
+          - apiGroups: ["batch"]
+            resources: ["cronjobs", "jobs"]
+            verbs: ["list", "watch"]
+          - apiGroups: ["autoscaling"]
+            resources: ["horizontalpodautoscalers"]
+            verbs: ["list", "watch"]
+          - apiGroups: ["networking.k8s.io"]
+            resources: ["ingresses", "networkpolicies"]
+            verbs: ["list", "watch"]
+    serviceAccount:
+      create: true
+    podSecurityPolicy:
+      enabled: false
+    serviceMonitor:
+      enabled: true
+    selfMonitor:
+      enabled: true
+    ports:
+      metrics:
+        port: 8080
+      telemetry:
+        port: 8081
+    livenessProbe:
+      httpGet:
+        path: /livez
+        port: 8080
+    readinessProbe:
+      httpGet:
+        path: /readyz
+        port: 8080
 
   grafana:
     enabled: true
