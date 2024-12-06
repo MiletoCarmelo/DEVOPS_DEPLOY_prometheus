@@ -1,3 +1,124 @@
+==== ./dashboards/kafka-dashboard.json.tpl ====
+
+{
+  "kind": "dashboard",
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 1,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "kafka_consumergroup_lag",
+          "refId": "A"
+        }
+      ],
+      "title": "Kafka Consumer Group Lag",
+      "type": "timeseries"
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": [
+    "kafka",
+    "monitoring"
+  ],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Kafka Overview",
+  "uid": "kafka-overview",
+  "version": 0
+}
+
 ==== ./umbrella_prometheus/values.yaml ====
 
 kube-prometheus-stack:
@@ -121,9 +242,9 @@ kube-prometheus-stack:
         enabled: true
         label: grafana_dashboard
         searchNamespace: ALL
-        defaultFolderName: "General"
+        defaultFolderName: "dashboards"
         provider:
-          folder: "General"
+          folder: "dashboards"
     plugins:
       - grafana-piechart-panel
       - grafana-clock-panel
@@ -181,5 +302,22 @@ dependencies:
   - name: kube-prometheus-stack
     version:  66.3.1
     repository: https://prometheus-community.github.io/helm-charts
+
+
+==== ./umbrella_prometheus/templates/dashboards-configmap.yaml ====
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboards
+  namespace: {{ .Release.Namespace }}
+  labels:
+    grafana_dashboard: "true"
+    app: {{ .Release.Name }}
+data:
+  {{- range $path, $_ := .Files.Glob "dashboards/*.json.tpl" }}
+  {{ base $path | trimSuffix ".tpl" }}: |
+{{ $.Files.Get $path | indent 4 }}
+  {{- end }}
 
 

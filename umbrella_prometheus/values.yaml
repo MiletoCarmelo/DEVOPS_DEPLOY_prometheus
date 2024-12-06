@@ -119,9 +119,9 @@ kube-prometheus-stack:
         enabled: true
         label: grafana_dashboard
         searchNamespace: ALL
-        defaultFolderName: "Kafka-Dashboards"
-        provider:
-          folder: "Kafka-Dashboards"
+        # defaultFolderName: "Kafka-Dashboards"
+        # provider:
+        #   folder: "Kafka-Dashboards"
     plugins:
       - grafana-piechart-panel
       - grafana-clock-panel
