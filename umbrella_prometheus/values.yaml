@@ -2,9 +2,9 @@ kube-prometheus-stack:
   namespace: monitoring
   prometheusOperator:
     enabled: true
-    createCustomResourceDefinitions: false
+    createCustomResourceDefinitions: true  # Changed to true to ensure CRDs are created
     admissionWebhooks:
-      enabled: false
+      enabled: false  # Disabled to avoid webhook issues
       failurePolicy: Fail  # Changement pour plus de sécurité
       patch:
         enabled: false
@@ -89,15 +89,23 @@ kube-prometheus-stack:
         nginx.ingress.kubernetes.io/ssl-redirect: "false"
         nginx.ingress.kubernetes.io/enable-admission-webhook: "false"  # Désactive la validation du webhook
 
+
+# Ajout des versions API pour les CRDs
 serviceMonitors:
   kafka:
     enabled: true
     namespace: kafka-dev
     scrapeInterval: 60s
     groupVersion: monitoring.coreos.com/v1
+    apiVersion: monitoring.coreos.com/v1
 
 prometheusRules:
   groupVersion: monitoring.coreos.com/v1
+  apiVersion: monitoring.coreos.com/v1
 
 kafka:
   lagThreshold: 5000
+
+
+
+
