@@ -4,12 +4,14 @@ kube-prometheus-stack:
     enabled: true
     createCustomResourceDefinitions: true  # Changed to true to ensure CRDs are created
     admissionWebhooks:
-      enabled: false  # Disabled to avoid webhook issues
-      failurePolicy: Fail  # Changement pour plus de sécurité
+      enabled: true  # Enable webhooks
+      failurePolicy: Ignore  # More lenient failure policy
+      certManager:
+        enabled: true  # Use cert-manager for certificates
       patch:
         enabled: false
     tls:
-      enabled: false
+      enabled: true # Enable TLS
     serviceMonitor:
       enabled: true
       selfMonitor: true
@@ -149,9 +151,11 @@ serviceMonitors:
     namespace: kafka-dev
     scrapeInterval: 60s
     apiVersion: monitoring.coreos.com/v1
+    groupVersion: monitoring.coreos.com/v1  # Add missing field
 
 prometheusRules:
   apiVersion: monitoring.coreos.com/v1
+  groupVersion: monitoring.coreos.com/v1  # Add missing field
 
 kafka:
   lagThreshold: 5000

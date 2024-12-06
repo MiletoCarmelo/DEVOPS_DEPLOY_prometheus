@@ -8,7 +8,8 @@ metadata:
     app.kubernetes.io/managed-by: prometheus-operator
     release: {{ .Release.Name }}
 spec:
-  groupVersion: {{ .Values.serviceMonitors.kafka.groupVersion }}
+  jobLabel: kafka-metrics
+  groupVersion: {{ .Values.prometheusRules.groupVersion }}
   selector:
     matchLabels:
       app: kafka
@@ -16,6 +17,7 @@ spec:
     - port: metrics
       interval: {{ .Values.serviceMonitors.kafka.scrapeInterval | default "30s" }}
       path: /metrics
+      scheme: http
   namespaceSelector:
     matchNames:
       - {{ .Values.serviceMonitors.kafka.namespace | default "default" }}
