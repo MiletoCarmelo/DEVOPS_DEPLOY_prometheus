@@ -56,6 +56,12 @@ helm install prometheus ./umbrella_prometheus -n monitoring --create-namespace
 
 # Access Grafana
 kubectl port-forward svc/prometheus-monitoring-grafana -n monitoring 3000:80
+
+# Access prometheus
+kubectl port-forward svc/prometheus-monitoring-kube-prometheus -n monitoring 9090:9090
+
+# Passwords for the first login: 
+admin/admin 
 ```
 
 Grafana will be available at: http://localhost:3000
