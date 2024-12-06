@@ -50,6 +50,15 @@ kube-prometheus-stack:
       annotations:
         "kubectl.kubernetes.io/last-applied-configuration": ""
 
+  prometheus-node-exporter:
+    hostNetwork: false  # Désactive hostNetwork pour éviter les conflits de ports
+    service:
+      port: 9100
+      targetPort: 9100
+
+  kubeStateMetrics:
+    enabled: true
+
   grafana:
     enabled: true
     adminPassword: admin  # Remplacer par un secret si nécessaire
