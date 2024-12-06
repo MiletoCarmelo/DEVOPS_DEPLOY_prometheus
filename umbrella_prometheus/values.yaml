@@ -1,31 +1,101 @@
-# values.yaml
-prometheus:
-  alertmanager:
+kube-prometheus-stack:
+  namespace: monitoring
+  prometheusOperator:
     enabled: true
+    createCustomResourceDefinitions: false
+    admissionWebhooks:
+      enabled: false
+      failurePolicy: Fail  # Changement pour plus de sécurité
+      patch:
+        enabled: false
+    tls:
+      enabled: false
+    serviceMonitor:
+      enabled: true
+      selfMonitor: true
+      labels:
+        app.kubernetes.io/managed-by: prometheus-operator
+    serviceAccount:
+      annotations:
+        "kubectl.kubernetes.io/last-applied-configuration": ""
+
+  prometheus:
+    enabled: true
+    prometheusSpec:
+      serviceMonitorSelector:
+        matchLabels:
+          app.kubernetes.io/managed-by: prometheus-operator
+      ruleSelector:
+        matchLabels:
+          app.kubernetes.io/managed-by: prometheus-operator
+      serviceMonitorNamespaceSelector: {}
+      ruleNamespaceSelector: {}
+      retention: 15d
+      resources:
+        requests:
+          memory: "256Mi"
+          cpu: "100m"
+        limits:
+          memory: "512Mi"
+          cpu: "200m"
+      storageSpec:
+        volumeClaimTemplate:
+          spec:
+            storageClassName: "local-path"
+            accessModes: ["ReadWriteOnce"]
+            resources:
+              requests:
+                storage: 10Gi
+    serviceAccount:
+      annotations:
+        "kubectl.kubernetes.io/last-applied-configuration": ""
+
+  grafana:
+    enabled: true
+    adminPassword: admin  # Remplacer par un secret si nécessaire
     persistence:
       enabled: true
       size: 10Gi
-    
-  server:
-    persistentVolume:
-      enabled: true
-      size: 50Gi
-    
-    retention: "30d"
-    
+    storageClassName: "local-path"
+    sidecar:
+      dashboards:
+        enabled: true
+        label: grafana_dashboard
+        searchNamespace: ALL
+        defaultFolderName: "General"
+        provider:
+          folder: "General"
+    plugins:
+      - grafana-piechart-panel
+      - grafana-clock-panel
+    securityContext:
+      runAsUser: 472
+      runAsGroup: 472
+      fsGroup: 472
     resources:
       requests:
-        cpu: 200m
-        memory: 1Gi
+        memory: 256Mi
+        cpu: 100m
       limits:
-        cpu: 1000m
-        memory: 2Gi
-    
-  nodeExporter:
+        memory: 512Mi
+        cpu: 200m
+    ingress:
+      enabled: true
+      ingressClassName: nginx
+      hosts:
+        - grafana.local  # Assure-toi que ce domaine résout correctement
+      annotations:
+        nginx.ingress.kubernetes.io/ssl-redirect: "false"
+
+serviceMonitors:
+  kafka:
     enabled: true
-    
-  pushgateway:
-    enabled: true
-    
-  kubeStateMetrics:
-    enabled: true
+    namespace: kafka-dev
+    scrapeInterval: 60s
+    groupVersion: monitoring.coreos.com/v1
+
+prometheusRules:
+  groupVersion: monitoring.coreos.com/v1
+
+kafka:
+  lagThreshold: 5000

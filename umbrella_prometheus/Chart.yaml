@@ -1,10 +1,11 @@
-# Chart.yaml
 apiVersion: v2
-name: umbrella-prometheus
-description: Umbrella chart for Prometheus Stack deployment
-version: 1.0.0
-type: application
+name: prometheus-umbrella
+description: Umbrella chart for Prometheus monitoring stack using kube-prometheus-stack
+version: 0.1.1
+maintainers:
+  - name: Carmelo Mileto
+    email: carmelo.mileto@gmail.com
 dependencies:
   - name: kube-prometheus-stack
-    version: 66.3.0  # Version stable connue
+    version:  66.3.1
     repository: https://prometheus-community.github.io/helm-charts
