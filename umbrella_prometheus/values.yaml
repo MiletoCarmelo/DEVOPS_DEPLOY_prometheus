@@ -67,6 +67,10 @@ kube-prometheus-stack:
       type: pvc
       size: 10Gi
       storageClassName: "local-path"
+      accessModes:
+        - ReadWriteOnce
+      finalizers:
+        - kubernetes.io/pvc-protection
     sidecar:
       dashboards:
         enabled: true
