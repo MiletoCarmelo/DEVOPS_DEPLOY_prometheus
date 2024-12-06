@@ -55,8 +55,9 @@ kube-prometheus-stack:
     adminPassword: admin  # Remplacer par un secret si nécessaire
     persistence:
       enabled: true
+      type: pvc
       size: 10Gi
-    storageClassName: "local-path"
+      storageClassName: "local-path"
     sidecar:
       dashboards:
         enabled: true
@@ -83,7 +84,7 @@ kube-prometheus-stack:
       enabled: true
       ingressClassName: nginx
       hosts:
-        - grafana.local  # Assure-toi que ce domaine résout correctement
+        - grafana.local
       annotations:
         nginx.ingress.kubernetes.io/ssl-redirect: "false"
 
