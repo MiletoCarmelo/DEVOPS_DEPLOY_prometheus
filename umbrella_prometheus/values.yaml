@@ -1,42 +1,31 @@
 # values.yaml
-kube-prometheus-stack:
-
-  grafana:
-    enabled: true
-    adminPassword: prom-operator
-    dashboardProviders:
-      dashboardproviders.yaml:
-        apiVersion: 1
-        providers:
-        - name: 'default'
-          orgId: 1
-          folder: ''
-          type: file
-          disableDeletion: false
-          editable: true
-          options:
-            path: /var/lib/grafana/dashboards
-    dashboards:
-      default:
-        kubernetes-cluster:
-          gnetId: 7249
-          revision: 1
-          datasource: Prometheus
-
-  prometheus:
-    prometheusSpec:
-      retentionSize: "10GB"  # En plus de retention: 30d
-      retention: 30d
-      resources:
-        requests:
-          cpu: 200m
-          memory: 1Gi
-        limits:
-          cpu: 1000m
-          memory: 2Gi
-    
+prometheus:
   alertmanager:
-    config:
-      global:
-        resolve_timeout: 5m
-    retention: 120h
+    enabled: true
+    persistence:
+      enabled: true
+      size: 10Gi
+    
+  server:
+    persistentVolume:
+      enabled: true
+      size: 50Gi
+    
+    retention: "30d"
+    
+    resources:
+      requests:
+        cpu: 200m
+        memory: 1Gi
+      limits:
+        cpu: 1000m
+        memory: 2Gi
+    
+  nodeExporter:
+    enabled: true
+    
+  pushgateway:
+    enabled: true
+    
+  kubeStateMetrics:
+    enabled: true
