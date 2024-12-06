@@ -58,7 +58,30 @@ kube-prometheus-stack:
 
   kubeStateMetrics:
     enabled: true
-
+    rbac:
+      create: true
+    serviceAccount:
+      create: true
+    podSecurityPolicy:
+      enabled: false
+    serviceMonitor:
+      enabled: true
+    selfMonitor:
+      enabled: true
+    ports:
+      metrics:
+        port: 8080
+      telemetry:
+        port: 8081
+    livenessProbe:
+      httpGet:
+        path: /livez
+        port: 8080
+    readinessProbe:
+      httpGet:
+        path: /readyz
+        port: 8080
+        
   grafana:
     enabled: true
     adminPassword: admin  # Remplacer par un secret si nécessaire
