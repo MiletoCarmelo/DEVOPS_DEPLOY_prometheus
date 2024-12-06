@@ -1,4 +1,5 @@
 kube-prometheus-stack:
+
   namespace: monitoring
   prometheusOperator:
     enabled: true
