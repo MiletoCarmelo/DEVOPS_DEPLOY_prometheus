@@ -98,7 +98,6 @@ kube-prometheus-stack:
         nginx.ingress.kubernetes.io/ssl-redirect: "true"
         nginx.ingress.kubernetes.io/enable-admission-webhook: "true"  # Désactive la validation du webhook
 
-
 # Ajout des versions API pour les CRDs
 serviceMonitors:
   kafka:

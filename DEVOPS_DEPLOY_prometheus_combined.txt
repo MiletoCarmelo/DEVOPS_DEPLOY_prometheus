@@ -4,9 +4,9 @@ kube-prometheus-stack:
   namespace: monitoring
   prometheusOperator:
     enabled: true
-    createCustomResourceDefinitions: false
+    createCustomResourceDefinitions: true  # Changed to true to ensure CRDs are created
     admissionWebhooks:
-      enabled: false
+      enabled: false  # Disabled to avoid webhook issues
       failurePolicy: Fail  # Changement pour plus de sécurité
       patch:
         enabled: false
@@ -52,13 +52,23 @@ kube-prometheus-stack:
       annotations:
         "kubectl.kubernetes.io/last-applied-configuration": ""
 
+  prometheus-node-exporter:
+    hostNetwork: false  # Désactive hostNetwork pour éviter les conflits de ports
+    service:
+      port: 9100
+      targetPort: 9100
+
+  kubeStateMetrics:
+    enabled: true
+
   grafana:
     enabled: true
     adminPassword: admin  # Remplacer par un secret si nécessaire
     persistence:
       enabled: true
+      type: pvc
       size: 10Gi
-    storageClassName: "local-path"
+      storageClassName: "local-path"
     sidecar:
       dashboards:
         enabled: true
@@ -85,23 +95,152 @@ kube-prometheus-stack:
       enabled: true
       ingressClassName: nginx
       hosts:
-        - grafana.local  # Assure-toi que ce domaine résout correctement
+        - grafana.local
       annotations:
-        nginx.ingress.kubernetes.io/ssl-redirect: "false"
+        nginx.ingress.kubernetes.io/ssl-redirect: "true"
+        nginx.ingress.kubernetes.io/enable-admission-webhook: "true"  # Désactive la validation du webhook
 
+# Ajout des versions API pour les CRDs
 serviceMonitors:
   kafka:
     enabled: true
     namespace: kafka-dev
     scrapeInterval: 60s
     groupVersion: monitoring.coreos.com/v1
+    apiVersion: monitoring.coreos.com/v1
 
 prometheusRules:
   groupVersion: monitoring.coreos.com/v1
+  apiVersion: monitoring.coreos.com/v1
 
 kafka:
   lagThreshold: 5000
 
+
+
+
+
+
+==== ./umbrella_prometheus/dashboards/kafka-dashboard.json.tpl ====
+
+{
+  "kind": "dashboard",
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 1,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "kafka_consumergroup_lag",
+          "refId": "A"
+        }
+      ],
+      "title": "Kafka Consumer Group Lag",
+      "type": "timeseries"
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": [
+    "kafka",
+    "monitoring"
+  ],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Kafka Overview",
+  "uid": "kafka-overview",
+  "version": 0
+}
 
 ==== ./umbrella_prometheus/Chart.yaml ====
 
@@ -159,7 +298,7 @@ spec:
             severity: warning
           annotations:
             summary: Pod crashing multiple times
-            description: 'Pod {{ $labels.namespace }}/{{ $labels.pod }} is restarting frequently'
+            description: 'Pod {{ `{{ $labels.namespace }}` }}/{{ `{{ $labels.pod }}` }} is restarting frequently'
         - alert: PodStuckInPending
           expr: kube_pod_status_phase{phase="Pending"} == 1
           for: 30m
@@ -167,7 +306,7 @@ spec:
             severity: warning
           annotations:
             summary: Pod stuck in Pending state
-            description: 'Pod {{ $labels.namespace }}/{{ $labels.pod }} has been in pending state for more than 30 minutes'
+            description: 'Pod {{ `{{ $labels.namespace }}` }}/{{ `{{ $labels.pod }}` }} has been in pending state for more than 30 minutes'
 
     - name: memory-alerts
       rules:
@@ -178,7 +317,7 @@ spec:
             severity: warning
           annotations:
             summary: High memory usage detected
-            description: 'Container {{ $labels.container }} in pod {{ $labels.pod }} is using more than 85% of its memory limit'
+            description: 'Container {{ `{{ $labels.container }}` }} in pod {{ `{{ $labels.pod }}` }} is using more than 85% of its memory limit'
 
     - name: kafka-alerts
       rules:
@@ -189,8 +328,7 @@ spec:
             severity: warning
           annotations:
             summary: Kafka consumer group lag
-            description: 'Consumer group {{ $labels.consumergroup }} on topic {{ $labels.topic }} is lagging by {{ $value }} messages'
-
+            description: 'Consumer group {{ `{{ $labels.consumergroup }}` }} on topic {{ `{{ $labels.topic }}` }} is lagging by {{ `{{ $value }}` }} messages'
 
 ==== ./umbrella_prometheus/templates/servicemonitors/kafka-monitor.yaml ====
 
