@@ -9,7 +9,7 @@ kube-prometheus-stack:
       certManager:
         enabled: true  # Use cert-manager for certificates
       patch:
-        enabled: false
+        enabled: true  # Activer le patch pour installer les certificats
     tls:
       enabled: true # Enable TLS
     serviceMonitor:
